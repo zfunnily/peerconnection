@@ -11,6 +11,7 @@
 #ifndef EXAMPLES_PEERCONNECTION_CLIENT_DEFAULTS_H_
 #define EXAMPLES_PEERCONNECTION_CLIENT_DEFAULTS_H_
 
+
 #include <stdint.h>
 
 #include <string>

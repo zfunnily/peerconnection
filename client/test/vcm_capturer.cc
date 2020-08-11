@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "test/vcm_capturer.h"
+#include "vcm_capturer.h"
 
 #include <stdint.h>
 #include <memory>

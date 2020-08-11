@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "Windows.h"
 #include "conductor.h"
 #include "flag_defs.h"
 #include "main_wnd.h"
