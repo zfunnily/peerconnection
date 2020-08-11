@@ -1,0 +1,8 @@
+build/
+.project
+.cproject
+.idea
+.vscode
+qtduild
+CMakeLists.txt.user
+OWNERS
