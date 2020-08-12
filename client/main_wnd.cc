@@ -231,7 +231,7 @@ void MainWnd::QueueUIThreadCallback(int msg_id, void* data) {
                       reinterpret_cast<LPARAM>(data));
 }
 
-void MainWnd::OnPaint() {
+/*void MainWnd::OnPaint() {
   PAINTSTRUCT ps;
   ::BeginPaint(handle(), &ps);
 
@@ -241,14 +241,107 @@ void MainWnd::OnPaint() {
   VideoRenderer* local_renderer = local_renderer_.get();
   VideoRenderer* remote_renderer = remote_renderer_.get();
   if (ui_ == STREAMING && remote_renderer && local_renderer) {
-    AutoLock<VideoRenderer> local_lock(local_renderer);
-    AutoLock<VideoRenderer> remote_lock(remote_renderer);
+	AutoLock<VideoRenderer> local_lock(local_renderer);
+	AutoLock<VideoRenderer> remote_lock(remote_renderer);
 
-    const BITMAPINFO& bmi = remote_renderer->bmi();
+	const BITMAPINFO& bmi = remote_renderer->bmi();
+	int height = abs(bmi.bmiHeader.biHeight);
+	int width = bmi.bmiHeader.biWidth;
+
+	const uint8_t* image = remote_renderer->image();
+	if (image != NULL) {
+	  HDC dc_mem = ::CreateCompatibleDC(ps.hdc);
+	  ::SetStretchBltMode(dc_mem, HALFTONE);
+
+	  // Set the map mode so that the ratio will be maintained for us.
+	  HDC all_dc[] = {ps.hdc, dc_mem};
+	  for (size_t i = 0; i < arraysize(all_dc); ++i) {
+		SetMapMode(all_dc[i], MM_ISOTROPIC);
+		SetWindowExtEx(all_dc[i], width, height, NULL);
+		SetViewportExtEx(all_dc[i], rc.right, rc.bottom, NULL);
+	  }
+
+	  HBITMAP bmp_mem = ::CreateCompatibleBitmap(ps.hdc, rc.right, rc.bottom);
+	  HGDIOBJ bmp_old = ::SelectObject(dc_mem, bmp_mem);
+
+	  POINT logical_area = {rc.right, rc.bottom};
+	  DPtoLP(ps.hdc, &logical_area, 1);
+
+	  HBRUSH brush = ::CreateSolidBrush(RGB(0, 0, 0));
+	  RECT logical_rect = {0, 0, logical_area.x, logical_area.y};
+	  ::FillRect(dc_mem, &logical_rect, brush);
+	  ::DeleteObject(brush);
+
+	  int x = (logical_area.x / 2) - (width / 2);
+	  int y = (logical_area.y / 2) - (height / 2);
+
+	  StretchDIBits(dc_mem, x, y, width, height, 0, 0, width, height, image,
+					&bmi, DIB_RGB_COLORS, SRCCOPY);
+
+	  if ((rc.right - rc.left) > 200 && (rc.bottom - rc.top) > 200) {
+		const BITMAPINFO& bmi = local_renderer->bmi();
+		image = local_renderer->image();
+		int thumb_width = bmi.bmiHeader.biWidth / 4;
+		int thumb_height = abs(bmi.bmiHeader.biHeight) / 4;
+		StretchDIBits(dc_mem, logical_area.x - thumb_width - 10,
+					  logical_area.y - thumb_height - 10, thumb_width,
+					  thumb_height, 0, 0, bmi.bmiHeader.biWidth,
+					  -bmi.bmiHeader.biHeight, image, &bmi, DIB_RGB_COLORS,
+					  SRCCOPY);
+	  }
+
+	  BitBlt(ps.hdc, 0, 0, logical_area.x, logical_area.y, dc_mem, 0, 0,
+			 SRCCOPY);
+
+	  // Cleanup.
+	  ::SelectObject(dc_mem, bmp_old);
+	  ::DeleteObject(bmp_mem);
+	  ::DeleteDC(dc_mem);
+	} else {
+	  // We're still waiting for the video stream to be initialized.
+	  HBRUSH brush = ::CreateSolidBrush(RGB(0, 0, 0));
+	  ::FillRect(ps.hdc, &rc, brush);
+	  ::DeleteObject(brush);
+
+	  HGDIOBJ old_font = ::SelectObject(ps.hdc, GetDefaultFont());
+	  ::SetTextColor(ps.hdc, RGB(0xff, 0xff, 0xff));
+	  ::SetBkMode(ps.hdc, TRANSPARENT);
+
+	  std::string text(kConnecting);
+	  if (!local_renderer->image()) {
+		text += kNoVideoStreams;
+	  } else {
+		text += kNoIncomingStream;
+	  }
+	  ::DrawTextA(ps.hdc, text.c_str(), -1, &rc,
+				  DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	  ::SelectObject(ps.hdc, old_font);
+	}
+  } else {
+	HBRUSH brush = ::CreateSolidBrush(::GetSysColor(COLOR_WINDOW));
+	::FillRect(ps.hdc, &rc, brush);
+	::DeleteObject(brush);
+  }
+
+  ::EndPaint(handle(), &ps);
+}*/
+
+void MainWnd::OnPaint() {
+  PAINTSTRUCT ps;
+  ::BeginPaint(handle(), &ps);
+
+  RECT rc;
+  ::GetClientRect(handle(), &rc);
+
+  VideoRenderer* local_renderer = local_renderer_.get();
+  if (ui_ == STREAMING && local_renderer) {
+    AutoLock<VideoRenderer> local_lock(local_renderer);
+
+    const BITMAPINFO& bmi = local_renderer->bmi();
     int height = abs(bmi.bmiHeader.biHeight);
     int width = bmi.bmiHeader.biWidth;
 
-    const uint8_t* image = remote_renderer->image();
+    const uint8_t* image = local_renderer->image();
     if (image != NULL) {
       HDC dc_mem = ::CreateCompatibleDC(ps.hdc);
       ::SetStretchBltMode(dc_mem, HALFTONE);
@@ -278,17 +371,7 @@ void MainWnd::OnPaint() {
       StretchDIBits(dc_mem, x, y, width, height, 0, 0, width, height, image,
                     &bmi, DIB_RGB_COLORS, SRCCOPY);
 
-      if ((rc.right - rc.left) > 200 && (rc.bottom - rc.top) > 200) {
-        const BITMAPINFO& bmi = local_renderer->bmi();
-        image = local_renderer->image();
-        int thumb_width = bmi.bmiHeader.biWidth / 4;
-        int thumb_height = abs(bmi.bmiHeader.biHeight) / 4;
-        StretchDIBits(dc_mem, logical_area.x - thumb_width - 10,
-                      logical_area.y - thumb_height - 10, thumb_width,
-                      thumb_height, 0, 0, bmi.bmiHeader.biWidth,
-                      -bmi.bmiHeader.biHeight, image, &bmi, DIB_RGB_COLORS,
-                      SRCCOPY);
-      }
+      
 
       BitBlt(ps.hdc, 0, 0, logical_area.x, logical_area.y, dc_mem, 0, 0,
              SRCCOPY);
@@ -336,8 +419,9 @@ void MainWnd::OnDefaultAction() {
   if (ui_ == CONNECT_TO_SERVER) {
     std::string server(GetWindowText(edit1_));
     std::string port_str(GetWindowText(edit2_));
-    int port = port_str.length() ? atoi(port_str.c_str()) : 0;
-    callback_->StartLogin(server, port);
+   /* int port = port_str.length() ? atoi(port_str.c_str()) : 0;
+	callback_->StartLogin(server, port);*/
+	callback_->ConnectToPeer(2223);
   } else if (ui_ == LIST_PEERS) {
     LRESULT sel = ::SendMessage(listbox_, LB_GETCURSEL, 0, 0);
     if (sel != LB_ERR) {

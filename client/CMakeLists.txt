@@ -35,6 +35,9 @@ if (WIN32)
         optimized ${WEBRTC_LIB_DIR}/third_party/jsoncpp/jsoncpp/json_writer.obj
         optimized ${WEBRTC_LIB_DIR}/third_party/jsoncpp/jsoncpp/json_value.obj
 		ws2_32.lib
+		
+		d3d11.lib
+		dxgi.lib
 		winmm.lib
 		secur32.lib
 		iphlpapi.lib
@@ -43,8 +46,6 @@ if (WIN32)
 		wmcodecdspuuid.lib
 		amstrmid.lib
 		msdmo.lib
-		d3d11.lib
-		dxgi.lib
     )
 
 	set(PROJECT_SOURCES  main.cc
@@ -58,7 +59,8 @@ if (WIN32)
                 strings/json.cc 
 			   )
 	# ºöÂÔ¿â
-	SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:"msvcprtd.lib; libcmtd.lib")
+	#SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:"msvcprtd.lib; libcmtd.lib")
+
 elseif (APPLE)
 
     set(WEBRTC_LIBRARIES_DEBUG
@@ -137,8 +139,12 @@ ${PROJECT_SOURCE_DIR}/strings
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-message("LIBWEBRTC_LIBRARIES: ${LIBWEBRTC_LIBRARIES}")
-add_executable(${PROJECT_OUTNAME} ${PROJECT_SOURCES}) 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    add_executable(${PROJECT_OUTNAME} ${PROJECT_SOURCES}) 
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    add_executable(${PROJECT_OUTNAME} WIN32  ${PROJECT_SOURCES})#WIN32 So the console window does not open on Windows
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+
 IF (WIN32)
 SET_TARGET_PROPERTIES(${PROJECT_OUTNAME} PROPERTIES LINK_FLAGS /MAP)
 ENDIF(WIN32)

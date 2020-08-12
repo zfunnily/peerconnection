@@ -17,8 +17,8 @@ if (WIN32)
     SET(PROJECT_LIB_DIR_RELEASE ${PROJECT_SOURCE_DIR}/../bin/windows_x64/im_common)
 
     set(WEBRTC_ROOT_DIR D:/Work/webrtc/webrtc/src)
-    set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/win/obj)
-	set(WEBRTC_LIB_PLAT ${WEBRTC_ROOT_DIR}/out/win)
+    set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/Debug/obj)
+	set(WEBRTC_LIB_PLAT ${WEBRTC_ROOT_DIR}/out/Debug)
 
 	# 运行时库设置
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
@@ -30,7 +30,7 @@ if (WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)
-
+	
 elseif (APPLE)
 	SET(OUTPUT_PATH_DEBUG ${PROJECT_SOURCE_DIR}/../build/debug_macos_x64)
 	SET(OUTPUT_PATH_RELEASE ${PROJECT_SOURCE_DIR}/../bin/macos_x64/im_common)
