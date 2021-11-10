@@ -6,7 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_SOURCE_DIR}/CMakeModules)
 
-# UNICODEºê¶¨Òå
+# UNICODEï¿½ê¶¨ï¿½ï¿½
 add_definitions(-DUNICODE -D_UNICODE)
 
 
@@ -20,11 +20,11 @@ if (WIN32)
     set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/Debug/obj)
 	set(WEBRTC_LIB_PLAT ${WEBRTC_ROOT_DIR}/out/Debug)
 
-	# ÔËÐÐÊ±¿âÉèÖÃ
+	# ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
-	# Îå¸ö±ØÒªµÄºê¶¨Òå
+	# ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Äºê¶¨ï¿½ï¿½
 	add_definitions(-DWEBRTC_WIN)
 	add_definitions(-DNOMINMAX)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -41,15 +41,16 @@ elseif (APPLE)
     set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/mac/obj)
 	add_definitions(-g -DWEBRTC_MAC -DWEBRTC_POSIX -fno-rtti)
 elseif (UNIX)
-	SET(OUTPUT_PATH_DEBUG ${PROJECT_SOURCE_DIR}/../build/debug_macos_x64)
-	SET(OUTPUT_PATH_RELEASE ${PROJECT_SOURCE_DIR}/../bin/macos_x64/im_common)
-	SET(PROJECT_LIB_DIR_DEBUG ${PROJECT_SOURCE_DIR}/../build/debug_macos_x64)
-	SET(PROJECT_LIB_DIR_RELEASE ${PROJECT_SOURCE_DIR}/../bin/macos_x64/im_common)
+	SET(OUTPUT_PATH_DEBUG ${PROJECT_SOURCE_DIR}/../build/debug_unix_x64)
+	SET(OUTPUT_PATH_RELEASE ${PROJECT_SOURCE_DIR}/../bin/unix_64/im_common)
+	SET(PROJECT_LIB_DIR_DEBUG ${PROJECT_SOURCE_DIR}/../build/debug_unix_x64)
+	SET(PROJECT_LIB_DIR_RELEASE ${PROJECT_SOURCE_DIR}/../bin/unix_64/im_common)
 
-    set(WEBRTC_ROOT_DIR /Users/sources/C++/macos_webrtc/webrtc/src/)
-    set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/mac/obj)
-	add_definitions(-g -DWEBRTC_MAC -DWEBRTC_POSIX -fno-rtti)
+    set(WEBRTC_ROOT_DIR /mnt/hgfs/webrtc/libwebrtc)
+    set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/Release/obj)
+	add_definitions(-g -DWEBRTC_LINUX -DWEBRTC_USE_X11 -DWEBRTC_POSIX -fno-rtti)
 endif ()
+
 set(WEBRTC_INCLUDE_DIR ${WEBRTC_ROOT_DIR})
 set(LIBWEBRTC_LIBRARIES ${WEBRTC_LIB_DIR})
 
@@ -58,16 +59,9 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_PATH_RELEASE})
 
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_PATH_DEBUG})
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_PATH_RELEASE})
-#ÉÏÃæÁ½ÌõÓï¾ä·Ö±ðÉèÖÃÁËDebug°æ±¾ºÍRelease°æ±¾¿âÎÄ¼þµÄÊä³öÄ¿Â¼,
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_PATH_DEBUG})
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_PATH_RELEASE})
-#ÉÏÃæÁ½ÌõÓï¾ä·Ö±ðÉèÖÃÁËDebug°æ±¾ºÍRelease°æ±¾¿ÉÖ´ÐÐÎÄ¼þµÄÊä³öÄ¿Â¼,
-
-#FIND_PACKAGE(PkgConfig REQUIRED)
-#PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)
-#PKG_CHECK_MODULES(JSONCPP REQUIRED jsoncpp)
-#add_definitions (${GTK3_CFLAGS_OTHER})
 
 
 link_directories(/usr/local/opt/gettext/lib

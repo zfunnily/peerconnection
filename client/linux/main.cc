@@ -13,10 +13,10 @@
 #include <stdio.h>
 
 #include "api/scoped_refptr.h"
-#include "examples/peerconnection/client/conductor.h"
-#include "examples/peerconnection/client/flag_defs.h"
-#include "examples/peerconnection/client/linux/main_wnd.h"
-#include "examples/peerconnection/client/peer_connection_client.h"
+#include "conductor.h"
+#include "flag_defs.h"
+#include "linux/main_wnd.h"
+#include "peer_connection_client.h"
 #include "rtc_base/flags.h"
 #include "rtc_base/message_queue.h"
 #include "rtc_base/physical_socket_server.h"

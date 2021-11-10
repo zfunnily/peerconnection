@@ -11,7 +11,7 @@
 # WebRTC root and default library directory
 # ============================================================================
 
-set(WEBRTC_ROOT_DIR "D:\\Work\\webrtc\\webrtc\\src" CACHE PATH "Where is the WebRTC root directory located?")
+set(WEBRTC_ROOT_DIR "/mnt/hgfs/webrtc/libwebrtc/" CACHE PATH "Where is the WebRTC root directory located?")
 
 if (DEFINED ENV{WEBRTC_ROOT_DIR})
   set(WEBRTC_ROOT_DIR $ENV{WEBRTC_ROOT_DIR})

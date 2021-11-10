@@ -58,7 +58,7 @@ if (WIN32)
                 test/field_trial.cc
                 strings/json.cc 
 			   )
-	# ºöÂÔ¿â
+	# ï¿½ï¿½ï¿½Ô¿ï¿½
 	#SET(CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:"msvcprtd.lib; libcmtd.lib")
 
 elseif (APPLE)
@@ -93,18 +93,23 @@ elseif (UNIX)
     set(WEBRTC_LIBRARIES_DEBUG
         debug ${WEBRTC_LIB_DIR}/libwebrtc.a
         debug ${WEBRTC_LIB_DIR}/third_party/jsoncpp/libjsoncpp.a
-        debug ${WEBRTC_LIB_DIR}/rtc_base/librtc_json_unittests.a
         debug ${WEBRTC_LIB_DIR}/rtc_base/librtc_base.a
         debug ${WEBRTC_LIB_DIR}/rtc_base/librtc_numerics.a
         debug ${WEBRTC_LIB_DIR}/rtc_base/libweak_ptr.a
-        debug ${WEBRTC_LIB_DIR}/third_party/jsoncpp/libjsoncpp.a
+
+        X11
+        pthread
+        dl
     )
     set(WEBRTC_LIBRARIES_RELEASE
         optimized ${WEBRTC_LIB_DIR}/libwebrtc.a
         optimized ${WEBRTC_LIB_DIR}/third_party/jsoncpp/libjsoncpp.a
-        optimized ${WEBRTC_LIB_DIR}/rtc_base/librtc_json_unittests.a
         optimized ${WEBRTC_LIB_DIR}/rtc_base/librtc_base.a
         optimized ${WEBRTC_LIB_DIR}/rtc_base/libweak_ptr.a
+
+        X11
+        pthread
+        dl
     )
 
 	set(PROJECT_SOURCES  linux/main.cc
@@ -123,10 +128,16 @@ elseif (UNIX)
             ${GTK3_LIBRARY_DIRS}
 )
 endif()
+FIND_PACKAGE(PkgConfig REQUIRED)
+PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)
+pkg_check_modules(GLIB_PKG glib-2.0)
+add_definitions (${GTK3_CFLAGS_OTHER})
 
 include(FindLibraries)
+
 include_directories(
 ${WEBRTC_INCLUDE_DIR}/
+${WEBRTC_INCLUDE_DIR}/api
 ${WEBRTC_INCLUDE_DIR}/third_party/abseil-cpp
 ${WEBRTC_INCLUDE_DIR}/third_party/libyuv/include
 ${WEBRTC_INCLUDE_DIR}/third_party/jsoncpp/source/include
@@ -138,6 +149,7 @@ ${PROJECT_SOURCE_DIR}/strings
 #file(GLOB_RECURSE HEAD_FILES ./*.h ./test/*.h ./strings/*.h)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+message("webrtc_include: " ${WEBRTC_INCLUDE_DIR})
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_executable(${PROJECT_OUTNAME} ${PROJECT_SOURCES}) 
