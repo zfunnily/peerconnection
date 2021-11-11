@@ -46,7 +46,7 @@ elseif (UNIX)
 	SET(PROJECT_LIB_DIR_DEBUG ${PROJECT_SOURCE_DIR}/../build/debug_unix_x64)
 	SET(PROJECT_LIB_DIR_RELEASE ${PROJECT_SOURCE_DIR}/../bin/unix_64/im_common)
 
-    set(WEBRTC_ROOT_DIR /mnt/hgfs/webrtc/libwebrtc)
+    set(WEBRTC_ROOT_DIR /mnt/hgfs/peerconnection/libwebrtc/)
     set(WEBRTC_LIB_DIR ${WEBRTC_ROOT_DIR}/out/Release/obj)
 	add_definitions(-g -DWEBRTC_LINUX -DWEBRTC_USE_X11 -DWEBRTC_POSIX -fno-rtti)
 endif ()
