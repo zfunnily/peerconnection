@@ -115,6 +115,7 @@ class CapturerTrackSource : public webrtc::VideoTrackSource {
  private:
   rtc::VideoSourceInterface<webrtc::VideoFrame>* source() override {
     return desk_.get();
+    // return capturer_.get();
   }
   std::unique_ptr<webrtc::test::VcmCapturer> capturer_;
   std::unique_ptr<RcrtcDesktopCapturerTrackSource> desk_;
@@ -459,12 +460,13 @@ void Conductor::AddTracks() {
                       << result_or_error.error().message();
   }
 
-  rtc::scoped_refptr<CapturerTrackSource> video_device = CapturerTrackSource::CreateDesk();
+  rtc::scoped_refptr<CapturerTrackSource> video_device = CapturerTrackSource::Create();
   if (video_device) {
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
         peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device));
     main_wnd_->StartLocalRenderer(video_track_);
 
+    printf("video_track_: %s\n", video_track_->kind());  
     result_or_error = peer_connection_->AddTrack(video_track_, {kStreamId});
     if (!result_or_error.ok()) {
       RTC_LOG(LS_ERROR) << "Failed to add video track to PeerConnection: "
@@ -534,6 +536,9 @@ void Conductor::UIThreadCallback(int msg_id, void* data) {
 
     case NEW_TRACK_ADDED: {
       auto* track = reinterpret_cast<webrtc::MediaStreamTrackInterface*>(data);
+      printf("peer_id_: %d, track->kind(): %s,%s, NEW_TRACK_ADDED......\n", peer_id_,
+      track->kind(),
+      webrtc::MediaStreamTrackInterface::kVideoKind);
       if (track->kind() == webrtc::MediaStreamTrackInterface::kVideoKind) {
         auto* video_track = static_cast<webrtc::VideoTrackInterface*>(track);
         main_wnd_->StartRemoteRenderer(video_track);

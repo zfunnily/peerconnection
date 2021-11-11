@@ -328,6 +328,7 @@ void PeerConnectionClient::OnRead(rtc::AsyncSocket* socket) {
         // First response.  Let's store our server assigned ID.
         RTC_DCHECK(state_ == SIGNING_IN);
         my_id_ = static_cast<int>(peer_id);
+        printf("my_id_ is %d\n", my_id_);
         RTC_DCHECK(my_id_ != -1);
 
         // The body of the response will be a list of already connected peers.
