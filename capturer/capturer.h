@@ -65,7 +65,6 @@ class RcrtcDesktopCapturerTrackSource : public webrtc::DesktopCapturer::Callback
         //                buffer->StrideU(), buffer->StrideV(), buffer->DataY(),
         //                buffer->DataU(), buffer->DataV(), this->_userContext);
         _sink->OnFrame(videoFrame);
-        printf("sink.....onframe\n");
       }
     }
   }
