@@ -50,16 +50,14 @@ PeerConnectionClient::~PeerConnectionClient() {}
 void PeerConnectionClient::InitSocketSignals() {
   RTC_DCHECK(control_socket_.get() != NULL);
   RTC_DCHECK(hanging_get_.get() != NULL);
-  control_socket_->SignalCloseEvent.connect(this,
-                                            &PeerConnectionClient::OnClose);
+  control_socket_->SignalCloseEvent.connect(this, &PeerConnectionClient::OnClose);
   hanging_get_->SignalCloseEvent.connect(this, &PeerConnectionClient::OnClose);
-  control_socket_->SignalConnectEvent.connect(this,
-                                              &PeerConnectionClient::OnConnect);
-  hanging_get_->SignalConnectEvent.connect(
-      this, &PeerConnectionClient::OnHangingGetConnect);
+
+  control_socket_->SignalConnectEvent.connect(this, &PeerConnectionClient::OnConnect);
+  hanging_get_->SignalConnectEvent.connect( this, &PeerConnectionClient::OnHangingGetConnect);
+
   control_socket_->SignalReadEvent.connect(this, &PeerConnectionClient::OnRead);
-  hanging_get_->SignalReadEvent.connect(
-      this, &PeerConnectionClient::OnHangingGetRead);
+  hanging_get_->SignalReadEvent.connect( this, &PeerConnectionClient::OnHangingGetRead);
 }
 
 int PeerConnectionClient::id() const {
