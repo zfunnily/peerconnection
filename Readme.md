@@ -7,6 +7,8 @@
     - 2020/08/11 wnidows上client release通过cmake编译完成
     - 2020/08/12 windows上直接调用camera并且渲染 完成
     - 2021/11/11 屏幕捕获 基础功能
+    - 2021/11/11 peerconnection 摄像头数据改为桌面共享
 
 
 屏幕共享： https://segmentfault.com/a/1190000040001557
+屏幕共享设置到peerconnection: https://blog.csdn.net/weixin_29405665/article/details/107320004

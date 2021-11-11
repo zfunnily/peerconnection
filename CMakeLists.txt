@@ -74,6 +74,6 @@ link_directories(/usr/local/opt/gettext/lib
 FIND_PACKAGE(PkgConfig REQUIRED)
 #add_subdirectory(test)
 #add_subdirectory(strings)
-add_subdirectory(captruer)
+# add_subdirectory(capturer)
 # add_subdirectory(server)
-# add_subdirectory(client)
+add_subdirectory(client)

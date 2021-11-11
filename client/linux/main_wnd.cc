@@ -544,6 +544,7 @@ void GtkMainWnd::VideoRenderer::SetSize(int width, int height) {
 }
 
 void GtkMainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
+  printf("VideoRenderer::OnFrame\n");
   gdk_threads_enter();
 
   rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(

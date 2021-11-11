@@ -44,6 +44,8 @@
 #include "strings/json.h"
 #include "test/vcm_capturer.h"
 
+#include "capturer.h"
+
 namespace {
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -92,16 +94,30 @@ class CapturerTrackSource : public webrtc::VideoTrackSource {
     return nullptr;
   }
 
+  static rtc::scoped_refptr<CapturerTrackSource> CreateDesk()
+  {
+    std::unique_ptr<RcrtcDesktopCapturerTrackSource> desk(RcrtcDesktopCapturerTrackSource::Create());
+    if (desk) {
+      printf("CreateDesk success");
+      return new rtc::RefCountedObject<CapturerTrackSource>(std::move(desk));
+    }
+      printf("CreateDesk failed...");
+    return nullptr;
+  }
+
  protected:
   explicit CapturerTrackSource(
       std::unique_ptr<webrtc::test::VcmCapturer> capturer)
       : VideoTrackSource(/*remote=*/false), capturer_(std::move(capturer)) {}
-
+  explicit CapturerTrackSource(
+      std::unique_ptr<RcrtcDesktopCapturerTrackSource> desk)
+      : VideoTrackSource(/*remote=*/false), desk_(std::move(desk)) {}
  private:
   rtc::VideoSourceInterface<webrtc::VideoFrame>* source() override {
-    return capturer_.get();
+    return desk_.get();
   }
   std::unique_ptr<webrtc::test::VcmCapturer> capturer_;
+  std::unique_ptr<RcrtcDesktopCapturerTrackSource> desk_;
 };
 
 }  // namespace
@@ -443,8 +459,7 @@ void Conductor::AddTracks() {
                       << result_or_error.error().message();
   }
 
-  rtc::scoped_refptr<CapturerTrackSource> video_device =
-      CapturerTrackSource::Create();
+  rtc::scoped_refptr<CapturerTrackSource> video_device = CapturerTrackSource::CreateDesk();
   if (video_device) {
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
         peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device));

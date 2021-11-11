@@ -100,6 +100,14 @@ elseif (UNIX)
         X11
         pthread
         dl
+        Xext 
+        Xtst
+        Xdamage
+        Xfixes 
+        Xcomposite
+        gobject-2.0
+        glib-2.0
+        gio-2.0
     )
     set(WEBRTC_LIBRARIES_RELEASE
         optimized ${WEBRTC_LIB_DIR}/libwebrtc.a
@@ -144,11 +152,12 @@ ${GTK3_INCLUDE_DIRS}
 ${PROJECT_SOURCE_DIR}/
 ${PROJECT_SOURCE_DIR}/test
 ${PROJECT_SOURCE_DIR}/strings
+${PROJECT_SOURCE_DIR}/../capturer
 )
 #file(GLOB_RECURSE HEAD_FILES ./*.h ./test/*.h ./strings/*.h)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-message("webrtc_include: " ${WEBRTC_INCLUDE_DIR})
+message("capturer: " ${PROJECT_SOURCE_DIR}/../capturer)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_executable(${PROJECT_OUTNAME} ${PROJECT_SOURCES}) 

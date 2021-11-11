@@ -12,7 +12,8 @@
 #include "modules/desktop_capture/desktop_and_cursor_composer.h"
 #include "rtc_base/thread.h"
 #include "system_wrappers/include/sleep.h"
-// #include "webrtc_desktop_capturer.h"
+
+#include "test/vcm_capturer.h"
 
 typedef void (*desktop_capture_frame_callback)(int width,
                                                int height,
@@ -24,11 +25,17 @@ typedef void (*desktop_capture_frame_callback)(int width,
                                                const uint8_t* v,
                                                void* context);
 
-class RcrtcDesktopCapturer : public webrtc::DesktopCapturer::Callback {
+class RcrtcDesktopCapturerTrackSource : public webrtc::DesktopCapturer::Callback,
+                                    public webrtc::test::TestVideoCapturer {
  public:
-  RcrtcDesktopCapturer(/*const std::map<std::string, std::string>& opts*/) {}
-  inline ~RcrtcDesktopCapturer() override {}
+  RcrtcDesktopCapturerTrackSource(/*const std::map<std::string, std::string>& opts*/) {}
+  inline ~RcrtcDesktopCapturerTrackSource() override {}
 
+ static RcrtcDesktopCapturerTrackSource* Create()
+{
+  std::unique_ptr<RcrtcDesktopCapturerTrackSource> desk(new RcrtcDesktopCapturerTrackSource);
+  return desk.release();
+}
   // overide webrtc::DesktopCapturer::Callback
   void OnCaptureResult(webrtc::DesktopCapturer::Result result,
                        std::unique_ptr<webrtc::DesktopFrame> frame) override {
@@ -52,11 +59,13 @@ class RcrtcDesktopCapturer : public webrtc::DesktopCapturer::Callback {
                                       webrtc::VideoRotation::kVideoRotation_0,
                                       rtc::TimeMicros());
 
-        rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
-            videoFrame.video_frame_buffer()->ToI420());
-        _frameCallback(buffer->width(), buffer->height(), buffer->StrideY(),
-                       buffer->StrideU(), buffer->StrideV(), buffer->DataY(),
-                       buffer->DataU(), buffer->DataV(), this->_userContext);
+        // rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
+        //     videoFrame.video_frame_buffer()->ToI420());
+        // _frameCallback(buffer->width(), buffer->height(), buffer->StrideY(),
+        //                buffer->StrideU(), buffer->StrideV(), buffer->DataY(),
+        //                buffer->DataU(), buffer->DataV(), this->_userContext);
+        _sink->OnFrame(videoFrame);
+        printf("sink.....onframe\n");
       }
     }
   }
@@ -91,9 +100,8 @@ class RcrtcDesktopCapturer : public webrtc::DesktopCapturer::Callback {
   }
 
   bool Start(desktop_capture_frame_callback back) {
-    printf("start....");
+    printf("start desk capturer...\n");
     _frameCallback = back;
-    printf("2222222222");
     _isrunning = true;
     _capture_thread = rtc::Thread::Create();
     _capture_thread->Start();
@@ -108,6 +116,20 @@ class RcrtcDesktopCapturer : public webrtc::DesktopCapturer::Callback {
     }
   }
 
+  void AddOrUpdateSink(
+    rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
+    const rtc::VideoSinkWants& wants) {
+      Start(nullptr);
+      _sink = sink;
+}
+
+void RemoveSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink) {
+  if (sink == _sink) {
+    _sink = nullptr;
+  }
+}
+
+
  public:
   int _msPerFrame = 100;  // 100毫秒采集一次，每秒钟采集10帧
   webrtc::DesktopCapturer::SourceList _excludeWindowList;  //需要过滤的窗口列表
@@ -117,6 +139,7 @@ class RcrtcDesktopCapturer : public webrtc::DesktopCapturer::Callback {
  private:
   std::unique_ptr<rtc::Thread> _capture_thread;
   bool _isrunning = false;
+  rtc::VideoSinkInterface<webrtc::VideoFrame>* _sink;
 };
 
 #endif
