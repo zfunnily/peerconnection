@@ -40,7 +40,15 @@ std::string GetEnvVarOrDefault(const char* env_var_name,
 }
 
 std::string GetPeerConnectionString() {
-  return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
+  return GetEnvVarOrDefault("WEBRTC_CONNECT", "turn:192.168.0.206:3478");
+}
+
+std::string GetICEUser() {
+  return GetEnvVarOrDefault("ICE_USER", "kurento");
+}
+
+std::string GetICEPasswd() {
+  return GetEnvVarOrDefault("ICE_PASSWD", "kurento");
 }
 
 std::string GetDefaultServerName() {

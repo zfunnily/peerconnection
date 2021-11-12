@@ -218,6 +218,7 @@ void MainWnd::StopLocalRenderer() {
 }
 
 void MainWnd::StartRemoteRenderer(webrtc::VideoTrackInterface* remote_video) {
+  printf("StartRemoteRenderer.....\n");
   remote_renderer_.reset(new VideoRenderer(handle(), 1, 1, remote_video));
 }
 

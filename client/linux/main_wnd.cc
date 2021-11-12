@@ -498,7 +498,7 @@ void GtkMainWnd::OnRedraw() {
     gtk_widget_queue_draw(draw_area_);
 #endif
   }else {
-    printf("render image() error.... \n");
+    // printf("render image() error.... \n");
   }
 
   gdk_threads_leave();
@@ -548,6 +548,7 @@ void GtkMainWnd::VideoRenderer::SetSize(int width, int height) {
 
 void GtkMainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
   gdk_threads_enter();
+  printf("回调数据 OnFrame\n");
 
   rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
       video_frame.video_frame_buffer()->ToI420());

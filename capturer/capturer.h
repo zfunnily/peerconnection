@@ -14,6 +14,7 @@
 #include "system_wrappers/include/sleep.h"
 
 #include "test/vcm_capturer.h"
+#include "rtc_base/platform_thread.h"
 
 typedef void (*desktop_capture_frame_callback)(int width,
                                                int height,
@@ -29,7 +30,9 @@ class RcrtcDesktopCapturerTrackSource : public webrtc::DesktopCapturer::Callback
                                         public webrtc::test::TestVideoCapturer
 {
 public:
-  RcrtcDesktopCapturerTrackSource(/*const std::map<std::string, std::string>& opts*/) {}
+  RcrtcDesktopCapturerTrackSource(/*const std::map<std::string, std::string>& opts*/) {
+    Start(nullptr);
+  }
   inline ~RcrtcDesktopCapturerTrackSource() override {}
 
   static RcrtcDesktopCapturerTrackSource *Create()
@@ -87,7 +90,12 @@ public:
     _excludeWindowList.push_back(windowId);
   }
 
-  void CaptureThread()
+  static void CaptureDeskThread(void *obj)
+  {
+    RcrtcDesktopCapturerTrackSource *capture = static_cast<RcrtcDesktopCapturerTrackSource *>(obj);
+    capture->CaptureProcess();
+  }
+  void CaptureProcess()
   {
     webrtc::DesktopCaptureOptions opts =
         webrtc::DesktopCaptureOptions::CreateDefault();
@@ -118,12 +126,20 @@ public:
   bool Start(desktop_capture_frame_callback back)
   {
     printf("start desk capturer...\n");
-    _frameCallback = back;
-    _isrunning = true;
-    _capture_thread = rtc::Thread::Create();
-    _capture_thread->Start();
-    _capture_thread->PostTask(RTC_FROM_HERE, [&]
-                              { CaptureThread(); });
+    if (!_capture_thread)
+    {
+      _frameCallback = back;
+      _isrunning = true;
+      _capture_thread.reset(new rtc::PlatformThread(RcrtcDesktopCapturerTrackSource::CaptureDeskThread, this,
+                                                    "CaptureThread", rtc::ThreadPriority::kHighPriority));
+
+      _capture_thread->Start();
+    }
+    // CaptureThread();
+    // _capture_thread = rtc::Thread::Create();
+    // _capture_thread->Start();
+    // _capture_thread->PostTask(RTC_FROM_HERE, [&]
+    //                           { CaptureThread(); });
   }
 
   void Stop()
@@ -140,7 +156,7 @@ public:
       rtc::VideoSinkInterface<webrtc::VideoFrame> *sink,
       const rtc::VideoSinkWants &wants)
   {
-    Start(nullptr);
+    // Start(nullptr);
     _sink = sink;
   }
 
@@ -150,6 +166,8 @@ public:
     {
       _sink = nullptr;
     }
+
+    Stop();
   }
 
 public:
@@ -159,7 +177,7 @@ public:
   void *_userContext = nullptr;
 
 private:
-  std::unique_ptr<rtc::Thread> _capture_thread;
+  std::unique_ptr<rtc::PlatformThread> _capture_thread;
   bool _isrunning = false;
   rtc::VideoSinkInterface<webrtc::VideoFrame> *_sink;
 };

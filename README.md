@@ -23,3 +23,5 @@ $ sudo apt install cmake gcc g++ libx11-dev pkg-config libgtk-3-dev -y
 
 屏幕共享： https://segmentfault.com/a/1190000040001557
 屏幕共享设置到peerconnection: https://blog.csdn.net/weixin_29405665/article/details/107320004
+
+服务器：https://github.com/konoui/kurento-coturn-docker.git

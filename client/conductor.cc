@@ -98,10 +98,10 @@ class CapturerTrackSource : public webrtc::VideoTrackSource {
   {
     std::unique_ptr<RcrtcDesktopCapturerTrackSource> desk(RcrtcDesktopCapturerTrackSource::Create());
     if (desk) {
-      printf("CreateDesk success");
+      printf("CreateDesk success\n");
       return new rtc::RefCountedObject<CapturerTrackSource>(std::move(desk));
     }
-      printf("CreateDesk failed...");
+      printf("CreateDesk failed...\n");
     return nullptr;
   }
 
@@ -196,7 +196,10 @@ bool Conductor::CreatePeerConnection(bool dtls) {
   config.enable_dtls_srtp = dtls;
   webrtc::PeerConnectionInterface::IceServer server;
   server.uri = GetPeerConnectionString();
+  server.username = GetICEUser();
+  server.password = GetICEPasswd();
   config.servers.push_back(server);
+  config.type = webrtc::PeerConnectionInterface::IceTransportsType::kRelay;
 
   peer_connection_ = peer_connection_factory_->CreatePeerConnection(
       config, nullptr, nullptr, this);
@@ -223,11 +226,17 @@ void Conductor::EnsureStreamingUI() {
 //
 // PeerConnectionObserver implementation.
 //
-
+//// This is called when a receiver and its track are created.
+// TODO(zhihuang): Make this pure virtual when all subclasses implement it.
+// Note: This is called with both Plan B and Unified Plan semantics. Unified
+// Plan users should prefer OnTrack, OnAddTrack is only called as backwards
+// compatibility (and is called in the exact same situations as OnTrack).
 void Conductor::OnAddTrack(
     rtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver,
     const std::vector<rtc::scoped_refptr<webrtc::MediaStreamInterface>>&
         streams) {
+  printf("Conductor::OnAddTrack NEW_TRACK_ADDED...\n");
+
   RTC_LOG(INFO) << __FUNCTION__ << " " << receiver->id();
   main_wnd_->QueueUIThreadCallback(NEW_TRACK_ADDED,
                                    receiver->track().release());
@@ -236,10 +245,12 @@ void Conductor::OnAddTrack(
 void Conductor::OnRemoveTrack(
     rtc::scoped_refptr<webrtc::RtpReceiverInterface> receiver) {
   RTC_LOG(INFO) << __FUNCTION__ << " " << receiver->id();
+  printf("Conductor::OnRemoveTrack: TRACK_REMOVED\n");
   main_wnd_->QueueUIThreadCallback(TRACK_REMOVED, receiver->track().release());
 }
 
 void Conductor::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
+  printf("Conductor::OnIceCandidate....\n");
   RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
   // For loopback test. To save some connecting delay.
   if (loopback_) {
@@ -289,6 +300,7 @@ void Conductor::OnPeerConnected(int id, const std::string& name) {
 }
 
 void Conductor::OnPeerDisconnected(int id) {
+  printf("Conductor::OnPeerDisconnected, PEER_CONNECTION_CLOSED id:%d\n", id);
   RTC_LOG(INFO) << __FUNCTION__;
   if (id == peer_id_) {
     RTC_LOG(INFO) << "Our peer disconnected";
@@ -301,6 +313,7 @@ void Conductor::OnPeerDisconnected(int id) {
 }
 
 void Conductor::OnMessageFromPeer(int peer_id, const std::string& message) {
+  printf("Conductor::OnMessageFromPeer, peer_id_:%d, peer_id: %d, %s...\n", peer_id_, peer_id, message);
   RTC_DCHECK(peer_id_ == peer_id || peer_id_ == -1);
   RTC_DCHECK(!message.empty());
 
@@ -332,6 +345,8 @@ void Conductor::OnMessageFromPeer(int peer_id, const std::string& message) {
 
   rtc::GetStringFromJsonObject(jmessage, kSessionDescriptionTypeName,
                                &type_str);
+
+  printf("type_str: %s\n", type_str.c_str());
   if (!type_str.empty()) {
     if (type_str == "offer-loopback") {
       // This is a loopback call.
@@ -365,10 +380,12 @@ void Conductor::OnMessageFromPeer(int peer_id, const std::string& message) {
       return;
     }
     RTC_LOG(INFO) << " Received session description :" << message;
+    printf("OnMessageFromPeer...SetRemoteDescription: %d, %s...\n", type == webrtc::SdpType::kOffer, message);
     peer_connection_->SetRemoteDescription(
         DummySetSessionDescriptionObserver::Create(),
         session_description.release());
     if (type == webrtc::SdpType::kOffer) {
+      printf("CreateAnswer: type: %d\n", type == webrtc::SdpType::kOffer);
       peer_connection_->CreateAnswer(
           this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
     }
@@ -384,6 +401,7 @@ void Conductor::OnMessageFromPeer(int peer_id, const std::string& message) {
       RTC_LOG(WARNING) << "Can't parse received message.";
       return;
     }
+    printf("Create IceCandidata....\n");
     webrtc::SdpParseError error;
     std::unique_ptr<webrtc::IceCandidateInterface> candidate(
         webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
@@ -402,6 +420,8 @@ void Conductor::OnMessageFromPeer(int peer_id, const std::string& message) {
 
 void Conductor::OnMessageSent(int err) {
   // Process the next pending message if any.
+  printf("Conductor::OnMessageSent, SEND_MESSAGE_TO_PEER,  err: %d...\n", err);
+
   main_wnd_->QueueUIThreadCallback(SEND_MESSAGE_TO_PEER, NULL);
 }
 
@@ -427,6 +447,8 @@ void Conductor::DisconnectFromServer() {
 }
 
 void Conductor::ConnectToPeer(int peer_id) {
+  printf("Conductor::ConnectToPeer: %d...\n", peer_id);
+
   RTC_DCHECK(peer_id_ == -1);
   RTC_DCHECK(peer_id != -1);
 
@@ -438,6 +460,7 @@ void Conductor::ConnectToPeer(int peer_id) {
 
   if (InitializePeerConnection()) {
     peer_id_ = peer_id;
+    printf("CreateOffer: peer_id_: %d\n", peer_id_);
     peer_connection_->CreateOffer(
         this, webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
   } else {
@@ -446,6 +469,7 @@ void Conductor::ConnectToPeer(int peer_id) {
 }
 
 void Conductor::AddTracks() {
+  printf("Conductor::AddTracks...\n");
   if (!peer_connection_->GetSenders().empty()) {
     return;  // Already added tracks.
   }
@@ -460,7 +484,7 @@ void Conductor::AddTracks() {
                       << result_or_error.error().message();
   }
 
-  rtc::scoped_refptr<CapturerTrackSource> video_device = CapturerTrackSource::Create();
+  rtc::scoped_refptr<CapturerTrackSource> video_device = CapturerTrackSource::CreateDesk();
   if (video_device) {
     rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track_(
         peer_connection_factory_->CreateVideoTrack(kVideoLabel, video_device));
@@ -536,9 +560,10 @@ void Conductor::UIThreadCallback(int msg_id, void* data) {
 
     case NEW_TRACK_ADDED: {
       auto* track = reinterpret_cast<webrtc::MediaStreamTrackInterface*>(data);
-      printf("peer_id_: %d, track->kind(): %s,%s, NEW_TRACK_ADDED......\n", peer_id_,
-      track->kind(),
-      webrtc::MediaStreamTrackInterface::kVideoKind);
+      printf("peer_id_: %d, track->kind():  %d, NEW_TRACK_ADDED......\n",
+      peer_id_,
+      track->kind()==webrtc::MediaStreamTrackInterface::kVideoKind);
+
       if (track->kind() == webrtc::MediaStreamTrackInterface::kVideoKind) {
         auto* video_track = static_cast<webrtc::VideoTrackInterface*>(track);
         main_wnd_->StartRemoteRenderer(video_track);
@@ -559,8 +584,9 @@ void Conductor::UIThreadCallback(int msg_id, void* data) {
       break;
   }
 }
-
+// SetLocalDescription and SetRemoteDescription callback interface. CreateOffer CreateAnswer
 void Conductor::OnSuccess(webrtc::SessionDescriptionInterface* desc) {
+  printf("Conductor::OnSuccess,start SetLocalDescription:%d..\n", desc->GetType()== webrtc::SdpType::kOffer);
   peer_connection_->SetLocalDescription(
       DummySetSessionDescriptionObserver::Create(), desc);
 
@@ -583,14 +609,17 @@ void Conductor::OnSuccess(webrtc::SessionDescriptionInterface* desc) {
   jmessage[kSessionDescriptionTypeName] =
       webrtc::SdpTypeToString(desc->GetType());
   jmessage[kSessionDescriptionSdpName] = sdp;
+  printf("Conductor::OnSuccess,End SetLocalDescription:%d, %s...\n", desc->GetType()== webrtc::SdpType::kOffer, sdp);
   SendMessage(writer.write(jmessage));
 }
 
 void Conductor::OnFailure(webrtc::RTCError error) {
+  printf("Conductor::OnFailure: %s...\n", error.message());
   RTC_LOG(LERROR) << ToString(error.type()) << ": " << error.message();
 }
 
 void Conductor::SendMessage(const std::string& json_object) {
+  printf("Conductor::SendMessage, peer_id_: %d, SEND_MESSAGE_TO_PEER , data: %s\n\n", peer_id_, json_object);
   std::string* msg = new std::string(json_object);
   main_wnd_->QueueUIThreadCallback(SEND_MESSAGE_TO_PEER, msg);
 }
