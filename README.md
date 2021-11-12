@@ -19,6 +19,7 @@ $ sudo apt install cmake gcc g++ libx11-dev pkg-config libgtk-3-dev -y
     - 2021/11/10 ubuntu18.04 完成cmake跨平台构建
     - 2021/11/11 屏幕捕获 基础功能
     - 2021/11/11 peerconnection 摄像头数据改为桌面共享
+    - 2021/11/12 远程桌面线程安全问题解决，通过cotorn可以正常通信。(之前的线程 在远程端peer SetLocalDescription的时候会卡住)
 
 
 屏幕共享： https://segmentfault.com/a/1190000040001557
