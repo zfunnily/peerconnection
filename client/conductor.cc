@@ -249,6 +249,7 @@ void Conductor::OnRemoveTrack(
   main_wnd_->QueueUIThreadCallback(TRACK_REMOVED, receiver->track().release());
 }
 
+// A new ICE candidate has been gathered.
 void Conductor::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
   printf("Conductor::OnIceCandidate....\n");
   RTC_LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();

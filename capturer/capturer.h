@@ -27,7 +27,8 @@ typedef void (*desktop_capture_frame_callback)(int width,
                                                void *context);
 
 class RcrtcDesktopCapturerTrackSource : public webrtc::DesktopCapturer::Callback,
-                                        public webrtc::test::TestVideoCapturer
+                                        // public webrtc::test::TestVideoCapturer,
+                                        public rtc::VideoSourceInterface<webrtc::VideoFrame>
 {
 public:
   RcrtcDesktopCapturerTrackSource(/*const std::map<std::string, std::string>& opts*/) {
