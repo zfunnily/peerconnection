@@ -1,10 +1,10 @@
 ## webrtc的peerconnection工程
-[x] windows上转化成cmake构建完成，client需要release启动
-[x] windows上直接调用camera并且渲染
+- [x] windows上转化成cmake构建完成，client需要release启动
+- [x] windows上直接调用camera并且渲染
 
 ### win
-[x] windows上转化成cmake构建完成，client需要release启动
-[x] windows上直接调用camera并且渲染
+- [x] windows上转化成cmake构建完成，client需要release启动
+- [x] windows上直接调用camera并且渲染
 ### ubuntu18.04
 cmake可以跨平台构建peerconnection
 环境安装
@@ -22,7 +22,7 @@ $ sudo apt install cmake gcc g++ libx11-dev pkg-config libgtk-3-dev -y
     - 2021/11/12 远程桌面线程安全问题解决，通过cotorn可以正常通信。(之前的线程 在远程端peer SetLocalDescription的时候会卡住)
 
 
-屏幕共享： https://segmentfault.com/a/1190000040001557
-屏幕共享设置到peerconnection: https://blog.csdn.net/weixin_29405665/article/details/107320004
-
-服务器：https://github.com/konoui/kurento-coturn-docker.git
+## 参考链接
+1. 屏幕共享： https://segmentfault.com/a/1190000040001557
+2. 屏幕共享设置到peerconnection: https://blog.csdn.net/weixin_29405665/article/details/107320004
+3. 服务器-docker安装：https://github.com/konoui/kurento-coturn-docker.git
