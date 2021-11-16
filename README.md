@@ -11,6 +11,10 @@ cmake可以跨平台构建peerconnection
 ```shell
 $ sudo apt install cmake gcc g++ libx11-dev pkg-config libgtk-3-dev -y
 ```
+我已经把头文件和peerconnection的库文件提取出来:
+```
+$ git clone https://github.com/zfunnily/libwebrtc.git
+```
 
 
 ## 更新日志
