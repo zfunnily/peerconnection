@@ -25,6 +25,9 @@ $ git clone https://github.com/zfunnily/libwebrtc.git
     - 2021/11/11 peerconnection 摄像头数据改为桌面共享
     - 2021/11/12 远程桌面线程安全问题解决，通过cotorn可以正常通信。(之前的线程 在远程端peer SetLocalDescription的时候会卡住)
 
+## 博客
+[webrtc-peerconnection](https://zfunnily.github.io/2021/11/webrtc-peerconnection/)
+[共享桌面](https://zfunnily.github.io/2021/11/webrtc-desk/)
 
 ## 参考链接
 1. 屏幕共享： https://segmentfault.com/a/1190000040001557
